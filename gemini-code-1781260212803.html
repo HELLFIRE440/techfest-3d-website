@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIT BOMBAY TECHFEST 2026 // The Next Dimension</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Reset & Core Styling */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #030303;
+            color: #ffffff;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            overscroll-behavior: none;
+        }
+
+        /* Fixed WebGL Canvas */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(3,3,3,0.9) 0%, rgba(3,3,3,0) 100%);
+            pointer-events: auto;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #00f3ff;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #bc13fe;
+            text-shadow: 0 0 8px #bc13fe;
+        }
+
+        /* Typography & Layout */
+        section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 100px 10vw; /* Added top padding for nav */
+            pointer-events: none; /* Lets clicks pass through to 3D canvas if needed */
+        }
+
+        h1, h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 6rem);
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+
+        h2 {
+            font-size: clamp(2rem, 4vw, 4rem);
+            font-weight: 700;
+            color: #00f3ff;
+            letter-spacing: 2px;
+        }
+
+        .highlight {
+            color: #00f3ff;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            letter-spacing: 8px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+            color: #a0a0a0;
+            max-width: 650px;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Interactive Elements */
+        .btn {
+            pointer-events: auto;
+            display: inline-block;
+            padding: 1rem 3rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: #00f3ff;
+            background: rgba(0, 243, 255, 0.05);
+            border: 1px solid #00f3ff;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn:hover {
+            background: #00f3ff;
+            color: #030303;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.6);
+        }
+
+        /* Registration Form */
+        .form-container {
+            pointer-events: auto;
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: #00f3ff;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #bc13fe;
+            background: rgba(188, 19, 254, 0.05);
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem 5vw;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: #050505;
+            color: #666;
+            font-size: 0.9rem;
+            pointer-events: auto;
+        }
+
+        /* Section Positioning */
+        #hero { align-items: flex-start; }
+        #about { align-items: flex-end; text-align: right; }
+        #about p { margin-left: auto; }
+        #events { align-items: flex-start; }
+        #register { align-items: flex-end; }
+        
+        /* Smooth Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #030303; }
+        ::-webkit-scrollbar-thumb { background: #00f3ff; border-radius: 4px; }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+
+    <canvas id="webgl-canvas"></canvas>
+
+    <nav>
+        <a href="#hero" class="logo">TF // 2026</a>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#events">Competitions</a>
+            <a href="#register">Register</a>
+        </div>
+    </nav>
+
+    <section id="hero">
+        <h1>
+            <span class="highlight">IIT BOMBAY</span>
+            TECHFEST 2026
+        </h1>
+        <p>Step into the next dimension of technology, innovation, and digital augmentation at Asia's largest science and technology festival.</p>
+        <a href="#about" class="btn">Initialize System</a>
+    </section>
+
+    <section id="about">
+        <h2>Asia's Largest<br>Tech Festival</h2>
+        <p>Hosted annually at the Indian Institute of Technology Bombay, Techfest has grown into an unparalleled platform for the brightest minds. Situated in the technological hub of Mumbai, we bring together leading industry experts, groundbreaking researchers, and over 175,000 global attendees to push the boundaries of the digital frontier.</p>
+        <p>Experience hands-on workshops, world-class exhibitions, and lectures from Nobel Laureates and industry titans.</p>
+    </section>
+
+    <section id="events">
+        <h2>Global<br>Nexus Arena</h2>
+        <p>Compete in international coding challenges, robotics combat, and hackathons. From artificial intelligence to quantum computing, prove your mettle against the best developers and engineers in the world.</p>
+        <a href="#register" class="btn">Join the Ranks</a>
+    </section>
+
+    <section id="register">
+        <div class="form-container">
+            <h2>Acquire<br>Access</h2>
+            <form id="registration-form" onsubmit="event.preventDefault(); alert('Identity Confirmed. Welcome to Techfest 2026.'); this.reset();">
+                <div class="form-group">
+                    <label for="name">Operator Name</label>
+                    <input type="text" id="name" class="form-control" required placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Encrypted Comms (Email)</label>
+                    <input type="email" id="email" class="form-control" required placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <label for="college">Affiliated Institution</label>
+                    <input type="text" id="college" class="form-control" required placeholder="University or College name">
+                </div>
+                <div class="form-group">
+                    <label for="year">Academic Year</label>
+                    <select id="year" class="form-control" required>
+                        <option value="" disabled selected>Select Year</option>
+                        <option value="1">First Year</option>
+                        <option value="2">Second Year</option>
+                        <option value="3">Third Year</option>
+                        <option value="4">Fourth Year</option>
+                        <option value="5">Postgrad/Other</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">Transmit Data</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Techfest, IIT Bombay. All digital rights reserved. | System Architecture by You</p>
+    </footer>
+
+    <script type="module">
+        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+
+        // 1. Scene Setup
+        const canvas = document.querySelector('#webgl-canvas');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x030303, 0.05);
+
+        // 2. Camera Setup
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 5;
+
+        // 3. Renderer Setup
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // 4. Create the Core Object
+        const geometry = new THREE.TorusKnotGeometry(1.2, 0.4, 128, 64);
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0x00f3ff, 
+            wireframe: true,
+            emissive: 0x0088ff,
+            emissiveIntensity: 0.4
+        });
+        const coreObject = new THREE.Mesh(geometry, material);
+        scene.add(coreObject);
+
+        // 5. Create Background Particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 2000;
+        const posArray = new Float32Array(particlesCount * 3);
+        
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 20; 
+        }
+        
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.015,
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.4
+        });
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        // 6. Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xbc13fe, 3, 100);
+        pointLight.position.set(2, 3, 4);
+        scene.add(pointLight);
+
+        // 7. Mouse Interaction
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX);
+            mouseY = (event.clientY - windowHalfY);
+        });
+
+        // 8. GSAP Scroll Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Move to left for "About" section
+        gsap.to(coreObject.position, {
+            x: -2.5,
+            y: 0,
+            z: -1,
+            scrollTrigger: {
+                trigger: "#about",
+                start: "top bottom",
+                end: "top top",
+                scrub: 1 
+            }
+        });
+
+        // Move to right and scale up for "Events" section
+        gsap.to(coreObject.position, {
+            x: 2.5,
+            y: 0,
+            z: 1,
+            scrollTrigger: {
+                trigger: "#events",
+                start: "top bottom",
+                end: "top top",
+                scrub: 1
+            }
+        });
+
+        // Move to center left and change color for "Register" section
+        gsap.to(coreObject.position, {
+            x: -2,
+            y: -0.5,
+            z: 0,
+            scrollTrigger: {
+                trigger: "#register",
+                start: "top bottom",
+                end: "top top",
+                scrub: 1
+            }
+        });
+
+        // Continuous rotation tied to scroll
+        gsap.to(coreObject.rotation, {
+            x: Math.PI * 4,
+            y: Math.PI * 4,
+            scrollTrigger: {
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1
+            }
+        });
+
+        // 9. Animation Loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // Default idle rotation
+            coreObject.rotation.y += 0.002;
+            coreObject.rotation.z += 0.001;
+
+            // Parallax camera movement based on mouse
+            targetX = mouseX * 0.001;
+            targetY = mouseY * 0.001;
+            camera.position.x += 0.05 * (targetX - camera.position.x);
+            camera.position.y += 0.05 * (-targetY - camera.position.y);
+            camera.lookAt(scene.position);
+
+            // Rotate particle field slowly
+            particlesMesh.rotation.y = elapsedTime * 0.02;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 10. Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
